@@ -1,7 +1,6 @@
 import numpy as np
 
-from First.computeCost import computeCost
-
+from First.computeCost import computeCost, computeCostVector
 
 #Градиент
 def gradientDescent(X, y, theta, alpha, num_iters):
@@ -24,24 +23,30 @@ def gradientDescent(X, y, theta, alpha, num_iters):
         cost_history.append(computeCost(X, y, theta))
     return theta, theta_history, cost_history
 
-def gradient_descent_vector(X, y, theta, alpha, iterations):
+def gradientDescentVector(X, y, theta, alpha, iterations):
     X = np.array(X)
     y = np.array(y)
-    theta = np.array(theta)
+    theta = np.array(theta, dtype=float)
 
     m = len(y)
     cost_history = []
     theta_history = []
 
     for _ in range(iterations):
-        predictions = X @ theta
+        # Вычисляем предсказания для всех примеров одновременно (векторизованно)
+        predictions = X.dot(theta)
+
+        # Вычисляем разницу между предсказаниями и реальными значениями (вектор ошибок)
         errors = predictions - y
 
-        gradient = (1 / m) * (X.T @ errors)
+        # Вычисляем градиент (векторизованно)
+        gradient = (1 / m) * X.T.dot(errors)
 
-        theta = theta - alpha * gradient
+        # Обновляем параметры theta (векторизованно)
+        theta -= alpha * gradient
 
-        cost_history.append(computeCost(X, y, theta))
+        # Сохраняем историю значений theta и стоимости
         theta_history.append(theta.copy())
+        cost_history.append(computeCostVector(X, y, theta))
 
-    return theta, cost_history, theta_history
+    return theta, theta_history, cost_history
